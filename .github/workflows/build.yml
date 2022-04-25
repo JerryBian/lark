@@ -1,0 +1,75 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Setup environment variables
+      run: |
+        APP_VERSION=`cat VERSION`
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "APP_VERSION_LINK=${APP_VERSION//.}" >> $GITHUB_ENV
+
+    - name: Build
+      run: cd script && sh build-binary.sh
+
+    - name: Package Binaries
+      run: |
+        cd build
+        sudo tar -cvzf lark-linux-amd64.tar.gz --directory=linux-amd64 .
+        sudo tar -cvzf lark-linux-arm64.tar.gz --directory=linux-arm64 .
+        cd windows-amd64 && sudo zip -r ../lark-windows-amd64.zip * && cd ..
+        cd darwin-amd64 && sudo zip -r ../lark-darwin-amd64.zip * && cd ..
+    
+    - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      name: Remove existing release for current version
+      with:
+        delete_release: true
+        tag_name: ${{ env.APP_VERSION }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: ncipollo/release-action@v1
+      name: publish release for current version
+      with:
+        artifacts: "build/*.gz,build/*.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        removeArtifacts: true
+        tag: ${{ env.APP_VERSION }}
+        allowUpdates: true
+        name: ${{ env.APP_VERSION }}
+        commit: master
+        artifactErrorsFailBuild: true
+        body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/lark/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
+    - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      name: Remove existing release for latest version
+      with:
+        delete_release: true
+        tag_name: latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: ncipollo/release-action@v1
+      name: publish release for latest version
+      with:
+        artifacts: "build/*.gz,build/*.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        removeArtifacts: true
+        tag: latest
+        allowUpdates: true
+        name: latest
+        commit: master
+        artifactErrorsFailBuild: true
+        body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/lark/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
