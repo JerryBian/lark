@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"embed"
 	"errors"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
+	"strings"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -17,6 +19,11 @@ import (
 //go:embed img/* style.css html/* bootstrap.min.js bootstrap.min.css
 var f embed.FS
 var dbLocation string
+var sessionSecret []byte
+var validUserName string
+var validPassword string
+
+const userkey = "user"
 
 func main() {
 	log.SetOutput(os.Stdout)
@@ -27,48 +34,123 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.Use(sessions.Sessions("_lark_", sessions.NewCookieStore(sessionSecret)))
 
 	templ := template.Must(template.New("").ParseFS(f, "html/*"))
 	r.SetHTMLTemplate(templ)
 
 	r.StaticFS("/asset", http.FS(f))
 
-	r.GET("/", func(c *gin.Context) {
-		words, err := GetAll()
-		if err != nil {
-			log.Fatal(err)
-			c.String(http.StatusBadRequest, "Something is wrong.")
-		}
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"Words": words,
-		})
+	r.GET("/login", func(c *gin.Context){
+		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
 
-	r.POST("/api/word/add", func(c *gin.Context) {
-		var word Word
-		var res JsonResponse[string]
-		if err := c.ShouldBindJSON(&word); err != nil {
-			log.Fatal(err)
-			res.Error = err.Error()
-			c.JSON(http.StatusBadRequest, res)
-			return
-		}
+	r.POST("/login", loginHander)
+	r.GET("/logout", logoutHandler)
 
-		now := time.Now()
-		word.Created_At = now.Format("2006-01-02 15:04:05")
-		_, err := AddWord(word)
-		if err != nil {
-			log.Fatal(err)
-			res.Error = err.Error()
-			c.JSON(http.StatusBadRequest, res)
-			return
-		}
-
-		c.JSON(http.StatusOK, res)
-	})
+	authRoute := r.Group("/")
+	authRoute.Use(AuthRequired)
+	authRoute.GET("/", indexHandler)
+	authRoute.POST("/api/word/add", addWordHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
+}
+
+func logoutHandler(c *gin.Context){
+	session := sessions.Default(c)
+	user := session.Get(userkey)
+
+	if user == nil {
+		log.Println("Logout error: Invalid session token")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid session token"})
+		return
+	}
+
+	session.Delete(userkey)
+
+	if err := session.Save(); err != nil {
+		log.Println("Logout error: Failed to save session")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		return
+	}
+
+	log.Println("Logout successfully.")
+	c.Redirect(http.StatusFound, "/login")
+}
+
+func loginHander(c *gin.Context){
+	session := sessions.Default(c)
+	userName := c.PostForm("userName")
+	password := c.PostForm("password")
+
+	if strings.Trim(userName, " ") == "" || strings.Trim(password, " ") == "" {
+		log.Println("Login error: missing username or password.")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username/password."})
+		return
+	}
+
+	if userName != validUserName || password != validPassword {
+		log.Printf("Login error: invalid username/password(%s/%s).", userName, password)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username/password."})
+		return
+	}
+
+	session.Options(sessions.Options{ MaxAge: 60 * 60 * 24 * 7, HttpOnly: true })
+	session.Set(userkey, userName)
+	if err := session.Save(); err != nil {
+		log.Println("Login error: Failed to save session")
+		c.JSON(http.StatusInternalServerError, gin.H{ "error": "failed to save session." })
+		return
+	}
+
+	log.Println("Login successfully.")
+	c.Redirect(http.StatusFound, "/")
+}
+
+func addWordHandler(c *gin.Context) {
+	var word Word
+	var res JsonResponse[string]
+	if err := c.ShouldBindJSON(&word); err != nil {
+		log.Fatal(err)
+		res.Error = err.Error()
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	now := time.Now()
+	word.Created_At = now.Format("2006-01-02 15:04:05")
+	_, err := AddWord(word)
+	if err != nil {
+		log.Fatal(err)
+		res.Error = err.Error()
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func indexHandler(c *gin.Context) {
+	words, err := GetAll()
+	if err != nil {
+		log.Fatal(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+	}
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"Words": words,
+	})
+}
+
+func AuthRequired(c *gin.Context) {
+	session := sessions.Default(c)
+	user := session.Get(userkey)
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	c.Next()
 }
 
 func setup() bool {
@@ -86,6 +168,19 @@ func setup() bool {
 	dbLocation = filepath.Join(dbDir, "lark.db")
 	os.OpenFile(dbLocation, os.O_RDONLY|os.O_CREATE, os.ModePerm)
 
+	validUserName = os.Getenv("USERNAME")
+	if len(validUserName) <= 0{
+		log.Println("Env USERNAME is missing!")
+		return false
+	}
+
+	validPassword = os.Getenv("PASSWORD")
+	if len(validUserName) <= 0{
+		log.Println("Env PASSWORD is missing!")
+		return false
+	}
+
+	sessionSecret = []byte(time.Now().Format("2006-01-02 15:04:05"))
 	return setupDb()
 }
 

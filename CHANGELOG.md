@@ -1,4 +1,7 @@
-TBD
+
+### 1.1
+
+Add authentication.
 
 ### 1.0
 

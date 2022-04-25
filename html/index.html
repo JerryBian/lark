@@ -38,7 +38,8 @@
 
     <footer class="text-center my-2">
         <a href="https://github.com/JerryBian/lark">GitHub</a> &middot;
-        <a href="https://www.flaticon.com/free-icons/bird" title="bird icons">Icons</a>
+        <a href="https://www.flaticon.com/free-icons/bird" title="bird icons">Icons</a> &middot;
+        <a href="/logout">Logout</a>
     </footer>
     <div class="modal fade p-2" tabindex="-1" id="addModal" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
@@ -49,7 +50,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-sm" id="saveNewWords">Save new words</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="saveNewWords" disabled>Save new
+                        words</button>
                 </div>
             </div>
         </div>
@@ -70,7 +72,7 @@
             let inputWords = newWordsContent.value.length;
             remainWords.innerHTML = `${maxWords - inputWords} remaining`;
 
-            if (inputWords > maxWords) {
+            if (inputWords > maxWords || inputWords <= 0) {
                 saveNewWords.disabled = true;
             } else {
                 saveNewWords.disabled = false;
@@ -82,7 +84,7 @@
         });
 
         document.querySelector("#saveNewWords").addEventListener("click", function () {
-            if (newWordsContent.value.length > maxWords) {
+            if (newWordsContent.value.length > maxWords || newWordsContent.value.length <= 0) {
                 return;
             }
 

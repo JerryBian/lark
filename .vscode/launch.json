@@ -11,7 +11,9 @@
             "mode": "debug",
             "program": "main.go",
             "env": {
-                "DB_LOCATION": "./build/dev"
+                "DB_LOCATION": "./build/dev",
+                "USERNAME": "test",
+                "PASSWORD": "test"
             }
         }
 
