@@ -117,7 +117,7 @@ func addWordHandler(c *gin.Context) {
 		return
 	}
 
-	now := time.Now()
+	now := time.Now().Local()
 	word.Created_At = now.Format("2006-01-02 15:04:05")
 	_, err := AddWord(word)
 	if err != nil {
@@ -180,7 +180,7 @@ func setup() bool {
 		return false
 	}
 
-	sessionSecret = []byte(time.Now().Format("2006-01-02 15:04:05"))
+	sessionSecret = []byte(time.Now().Local().Format("2006-01-02 15:04:05"))
 	return setupDb()
 }
 

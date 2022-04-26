@@ -1,3 +1,9 @@
+Listed changes for every releases.
+
+### 1.2
+
+- Fix time to local TZ
+- Enhance few UI
 
 ### 1.1
 
