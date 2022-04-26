@@ -9,12 +9,12 @@
     <link href="/asset/bootstrap.min.css" rel="stylesheet" />
     <link href="/asset/style.css" rel="stylesheet" />
 
-    <title>Lark &middot; Record your private words.</title>
+    <title>Lark &middot; Place for your private words</title>
 
     <link rel="icon" href="/asset/img/lark.png">
 </head>
 
-<body class="p-1 flex-column w-100 min-vh-100">
+<body class="p-1 d-flex flex-column w-100 min-vh-100">
     <nav class="text-center my-3">
         <div class="mb-3"><a href="/">
                 <img src="/asset/img/lark.png" alt="" width="48" height="48">
@@ -24,7 +24,7 @@
         </div>
     </nav>
 
-    <main>
+    <main class="mb-3">
         <div class="list-group">
             {{ range .Words }}
             <div class="list-group-item">
@@ -39,17 +39,18 @@
         </div>
     </main>
 
-    <footer class="text-center my-2 mt-auto">
-        <a href="https://github.com/JerryBian/lark">GitHub</a> &middot;
-        <a href="https://www.flaticon.com/free-icons/bird" title="bird icons">Icons</a> &middot;
-        <a href="/logout">Logout</a>
+    <footer class="text-center my-2 mt-auto text-muted small">
+        <a href="https://github.com/JerryBian/lark" class="text-reset">GitHub</a> &middot;
+        <a href="https://www.flaticon.com/free-icons/bird" title="bird icons" class="text-reset">Icons</a> &middot;
+        <a href="/logout" class="text-reset">Logout</a>
     </footer>
     <div class="modal fade p-2" tabindex="-1" id="addModal" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body mt-3">
-                    <textarea rows="5" class="form-control" id="newWordsContent"></textarea>
-                    <div class="text-end small text-muted mt-1" id="remainWords">Max words: </div>
+                    <label for="newWordsContent" class="form-label">Write down your words here</label>
+                    <textarea rows="7" class="form-control " id="newWordsContent"></textarea>
+                    <div class="text-end small text-muted mt-1 form-text" id="remainWords">Max words: </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -73,7 +74,7 @@
 
         newWordsContent.addEventListener("input", function () {
             let inputWords = newWordsContent.value.length;
-            remainWords.innerHTML = `${maxWords - inputWords} remaining`;
+            remainWords.innerHTML = `${maxWords - inputWords} words remaining...`;
 
             if (inputWords > maxWords || inputWords <= 0) {
                 saveNewWords.disabled = true;
@@ -86,7 +87,8 @@
             remainWords.innerHTML = `Max words: ${maxWords}`;
         });
 
-        document.querySelector("#saveNewWords").addEventListener("click", function () {
+        saveNewWords.addEventListener("click", function () {
+            saveNewWords.disabled = true;
             if (newWordsContent.value.length > maxWords || newWordsContent.value.length <= 0) {
                 return;
             }

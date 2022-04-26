@@ -2,3 +2,8 @@ html, body{
     margin: 0 auto;
     max-width: 600px;
 }
+
+textarea{
+    resize: none;
+    padding: 1%;
+}
