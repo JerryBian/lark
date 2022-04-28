@@ -1,5 +1,9 @@
 Listed changes for every releases.
 
+### 1.3
+
+Support docker
+
 ### 1.2
 
 - Fix time to local TZ
