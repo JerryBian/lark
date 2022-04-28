@@ -75,7 +75,7 @@ jobs:
         body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/lark/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
 
     - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v1
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
