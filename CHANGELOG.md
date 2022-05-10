@@ -1,5 +1,9 @@
 Listed changes for every releases.
 
+### 1.4
+
+Support line breaks in words.
+
 ### 1.3
 
 Support docker

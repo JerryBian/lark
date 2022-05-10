@@ -162,7 +162,10 @@ func setup() bool {
 	}
 
 	if _, err := os.Stat(dbDir); errors.Is(err, os.ErrNotExist) {
-		os.Mkdir(dbDir, os.ModePerm)
+		err = os.MkdirAll(dbDir, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	dbLocation = filepath.Join(dbDir, "lark.db")
@@ -213,7 +216,7 @@ func GetAll() ([]Word, error) {
 		if err := rows.Scan(&word.Id, &word.Content, &word.Created_At); err != nil {
 			return nil, err
 		}
-
+		
 		res = append(res, word)
 	}
 
