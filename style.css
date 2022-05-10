@@ -7,3 +7,9 @@ textarea{
     resize: none;
     padding: 1%;
 }
+
+pre{
+    white-space: pre-wrap;
+    font-family: var(--bs-body-font-family);
+    font-size: 0.9em;
+}
