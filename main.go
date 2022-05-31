@@ -3,25 +3,32 @@ package main
 import (
 	"database/sql"
 	"embed"
+	"encoding/json"
 	"errors"
-	"github.com/gin-gonic/contrib/sessions"
-	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	"fmt"
 	"html/template"
 	"log"
-	"strings"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
+
+	L "github.com/JerryBian/lark/internal"
+	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //go:embed img/* style.css html/* bootstrap.min.js bootstrap.min.css
 var f embed.FS
-var dbLocation string
+var dbConnStr string
 var sessionSecret []byte
 var validUserName string
 var validPassword string
+var stopping bool
+var lastSavedAt time.Time
+var lastModifiedAt time.Time
 
 const userkey = "user"
 
@@ -53,7 +60,53 @@ func main() {
 	authRoute.GET("/", indexHandler)
 	authRoute.POST("/api/word/add", addWordHandler)
 
+	go uploadData()
+
 	r.Run() // listen and serve on 0.0.0.0:8080
+}
+
+func uploadData() {
+	now := time.Now()
+	lastModifiedAt = now
+	lastSavedAt = now
+	L.CreateContainerIfNotExists()
+
+	for !stopping {
+		time.Sleep(time.Hour)
+		if lastSavedAt.After(lastModifiedAt) {
+			continue
+		}
+
+		words, err := GetAll()
+		if err != nil{
+			log.Println(err)
+		}
+
+		if err != nil {
+			log.Println(err)
+		} else {
+			b, err:=json.Marshal(words)
+			if err != nil {
+				log.Println(err)
+			} else {
+				err = L.Save("", b)
+				if err != nil {
+					log.Println(err)
+				} else {
+					lastSavedAt = time.Now().Local()
+					log.Println("JSON saved successfully.")
+				}
+
+				err = L.Save("-" + time.Now().Local().Format("20060102"), b)
+				if err != nil {
+					log.Println(err)
+				} else {
+					lastSavedAt = time.Now().Local()
+					log.Println("JSON snapshot saved successfully.")
+				}
+			}
+		}
+	}
 }
 
 func logoutHandler(c *gin.Context){
@@ -161,6 +214,11 @@ func setup() bool {
 		return false
 	}
 
+	dbDir, err := filepath.Abs(dbDir)
+	if err != nil {
+		log.Println(err)
+	}
+
 	if _, err := os.Stat(dbDir); errors.Is(err, os.ErrNotExist) {
 		err = os.MkdirAll(dbDir, os.ModePerm)
 		if err != nil {
@@ -168,8 +226,12 @@ func setup() bool {
 		}
 	}
 
-	dbLocation = filepath.Join(dbDir, "lark.db")
-	os.OpenFile(dbLocation, os.O_RDONLY|os.O_CREATE, os.ModePerm)
+	dbLocation := filepath.Join(dbDir, "lark.db")
+	if err != nil {
+		log.Println(err)
+	}
+	
+	//os.OpenFile(dbLocation, os.O_RDONLY|os.O_CREATE, os.ModePerm)
 
 	validUserName = os.Getenv("USERNAME")
 	if len(validUserName) <= 0{
@@ -184,25 +246,70 @@ func setup() bool {
 	}
 
 	sessionSecret = []byte(time.Now().Local().Format("2006-01-02 15:04:05"))
+	dbConnStr = fmt.Sprintf("file:%s?cache=shared&mode=rwc", dbLocation)
 	return setupDb()
 }
 
 func setupDb() bool {
-	database, _ := sql.Open("sqlite3", dbLocation)
-	statement, _ := database.Prepare(`
+	database, err := sql.Open("sqlite3", dbConnStr)
+	if err != nil {
+		log.Println(err)
+	}
+	//defer database.Close()
+
+	database.Ping()
+	statement, err := database.Prepare(`
 		CREATE TABLE IF NOT EXISTS word(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			content TEXT NOT NULL,
 			created_at TEXT NOT NULL
 		)
 	`)
+
+	if err != nil {
+		log.Println(err)
+	}
+
 	statement.Exec()
+
+	rows, _ := database.Query(`
+		SELECT EXISTS (SELECT 1 FROM word)
+	`)
+
+	recordExists := true
+	defer rows.Close()
+	for rows.Next() {
+		if err := rows.Scan(&recordExists); err != nil {
+			log.Println(err)
+		}
+	}
+
+	// try to load from Azure Blob
+	if !recordExists {
+		b, err := L.Load()
+		if err != nil {
+			log.Println(err)
+		} else {
+			var words []Word
+			err=json.Unmarshal(b, &words)
+			if err != nil {
+				log.Println(err)
+			} else{
+				for _, item := range words {
+					_, err = AddWord(item)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			}
+		}
+	}
 
 	return true
 }
 
 func GetAll() ([]Word, error) {
-	database, _ := sql.Open("sqlite3", dbLocation)
+	database, _ := sql.Open("sqlite3", dbConnStr)
 	rows, err := database.Query("SELECT * FROM word ORDER BY created_at DESC")
 	if err != nil {
 		return nil, err
@@ -216,7 +323,7 @@ func GetAll() ([]Word, error) {
 		if err := rows.Scan(&word.Id, &word.Content, &word.Created_At); err != nil {
 			return nil, err
 		}
-		
+
 		res = append(res, word)
 	}
 
@@ -225,7 +332,7 @@ func GetAll() ([]Word, error) {
 
 func AddWord(word Word) (*Word, error) {
 	log.Println("add new word ...")
-	database, _ := sql.Open("sqlite3", dbLocation)
+	database, _ := sql.Open("sqlite3", dbConnStr)
 	res, err := database.Exec("INSERT INTO word(content, created_at) VALUES(?,?)", word.Content, word.Created_At)
 	if err != nil {
 		return nil, err
@@ -237,6 +344,7 @@ func AddWord(word Word) (*Word, error) {
 	}
 
 	word.Id = id
+	lastModifiedAt = time.Now().Local()
 	log.Println("finished add new word")
 	return &word, nil
 }

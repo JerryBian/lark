@@ -1,5 +1,9 @@
 Listed changes for every releases.
 
+### 1.5
+
+Support Azure Blob backup and restore
+
 ### 1.4
 
 Support line breaks in words.
