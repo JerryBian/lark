@@ -1,0 +1,15 @@
+html, body{
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+textarea{
+    resize: none;
+    padding: 1%;
+}
+
+pre{
+    white-space: pre-wrap;
+    font-family: var(--bs-body-font-family);
+    font-size: 0.9em;
+}

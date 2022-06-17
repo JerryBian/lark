@@ -29,7 +29,7 @@ jobs:
 
     - name: Package Binaries
       run: |
-        cd build
+        cd _
         sudo tar -cvzf lark-linux-amd64.tar.gz --directory=linux-amd64 .
         sudo tar -cvzf lark-linux-arm64.tar.gz --directory=linux-arm64 .
         cd windows-amd64 && sudo zip -r ../lark-windows-amd64.zip * && cd ..
@@ -45,7 +45,7 @@ jobs:
     - uses: ncipollo/release-action@v1
       name: publish release for current version
       with:
-        artifacts: "build/*.gz,build/*.zip"
+        artifacts: "_/*.gz,_/*.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         removeArtifacts: true
         tag: ${{ env.APP_VERSION }}
@@ -64,7 +64,7 @@ jobs:
     - uses: ncipollo/release-action@v1
       name: publish release for latest version
       with:
-        artifacts: "build/*.gz,build/*.zip"
+        artifacts: "_/*.gz,_/*.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         removeArtifacts: true
         tag: latest

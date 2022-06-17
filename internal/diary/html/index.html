@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/asset/style/bootstrap.min.css" rel="stylesheet" />
+    <link href="/asset/style/style.css" rel="stylesheet" />
+
+    <title>Lark &middot; Place for your private words</title>
+
+    <link rel="icon" href="/asset/img/lark.png">
+</head>
+
+<body class="p-1 d-flex flex-column w-100 min-vh-100">
+    <nav class="text-center my-3">
+        <div class="mb-3"><a href="/">
+                <img src="/asset/img/lark.png" alt="" width="48" height="48">
+            </a></div>
+        <div>
+            <button type="button" class="btn btn-success btn-sm" id="add">+ New Words</button>
+        </div>
+    </nav>
+
+    <main class="mb-3">
+        <div class="list-group">
+            {{ range .Diaries }}
+            <div class="list-group-item">
+                <div class="text-muted small">
+                    {{ .Title }}
+                </div>
+                <div class="mb-2">
+                    {{ range $index, $item := .Contents }}
+                    <pre class="mt-1"> {{ $item.Content }} </pre>
+                    {{ end }}
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </main>
+
+    <footer class="text-center my-2 mt-auto text-muted small">
+        <a href="https://github.com/JerryBian/lark" class="text-reset">GitHub</a> &middot;
+        <a href="https://www.flaticon.com/free-icons/bird" title="bird icons" class="text-reset">Icons</a> &middot;
+        <a href="/logout" class="text-reset">Logout</a>
+    </footer>
+    <div class="modal fade p-2" tabindex="-1" id="addModal" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body mt-3">
+                    <label for="newWordsContent" class="form-label">Write down your words here</label>
+                    <textarea rows="7" class="form-control " id="newWordsContent"></textarea>
+                    <div class="text-end small text-muted mt-1 form-text" id="remainWords">Max words: </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="saveNewWords" disabled>Save new
+                        words</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/asset/script/bootstrap.min.js"></script>
+    <script>
+        const maxWords = 320;
+        let newWordsContent = document.querySelector("#newWordsContent");
+        let remainWords = document.querySelector("#remainWords");
+        let saveNewWords = document.querySelector("#saveNewWords");
+        document.querySelector("#add").addEventListener("click", function () {
+            let addModalEl = document.querySelector('#addModal');
+            let modal = bootstrap.Modal.getOrCreateInstance(addModalEl);
+            modal.show();
+        });
+
+        newWordsContent.addEventListener("input", function () {
+            let inputWords = newWordsContent.value.length;
+            remainWords.innerHTML = `${maxWords - inputWords} words remaining...`;
+
+            if (inputWords > maxWords || inputWords <= 0) {
+                saveNewWords.disabled = true;
+            } else {
+                saveNewWords.disabled = false;
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            remainWords.innerHTML = `Max words: ${maxWords}`;
+        });
+
+        saveNewWords.addEventListener("click", function () {
+            saveNewWords.disabled = true;
+            if (newWordsContent.value.length > maxWords || newWordsContent.value.length <= 0) {
+                return;
+            }
+
+            fetch("/api/word/add", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        content: newWordsContent.value
+                    }]
+                })
+            }).then(res => {
+                return res.json()
+            }).then(data => {
+                console.log("Add new words successfully.");
+                console.log(data)
+                if (data.Error) {
+                    alert(data.Error);
+                } else {
+                    window.location.href = "/";
+                }
+
+            });
+        });
+    </script>
+</body>
+
+</html>

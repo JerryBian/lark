@@ -1,0 +1,17 @@
+database:
+  location: "./_/_db"
+
+server:
+  port: 9898
+  mode: diary
+  ginMode: debug
+
+user:
+  name: test
+  password: test
+
+az:
+  connStr:
+  blobContainer: dev
+  blob: db.json
+  backupInterval: 1
