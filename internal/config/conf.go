@@ -17,7 +17,7 @@ type Config struct {
 	Server struct {
 		Port int `yaml:"port" envconfig:"ENV_SERVER_PORT"`
 		Mode string `yaml:"mode" envconfig:"ENV_SERVER_MODE"`
-		GinMode string `yaml:"ginMode" envconfig:"ENV_GIN_MODE"`
+		GinMode string `yaml:"ginMode" envconfig:"ENV_SERVER_GIN_MODE"`
 	} `yaml:"server"`
 
 	Database struct {

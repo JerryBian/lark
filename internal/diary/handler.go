@@ -2,6 +2,7 @@ package internal
 
 import (
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +32,8 @@ func (h *Handler) Run() {
 	templ := template.Must(template.New("").ParseFS(h.Conf.Runtime.F, "internal/diary/html/*.html"))
 	r.SetHTMLTemplate(templ)
 
-	r.StaticFS("/asset", http.Dir("static"))
+	staticFs, _ := fs.Sub(h.Conf.Runtime.F, "static")
+	r.StaticFS("/static", http.FS(staticFs))
 
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
