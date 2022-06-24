@@ -7,8 +7,8 @@ type Diary struct {
 	Contents       []DiaryContent `json:"contents"`
 	CreatedAt      int64          `json:"created_at"`
 	LastModifiedAt int64          `json:"last_modified_at"`
-
-	Title string `json:"-"`
+	
+	Revisions int `json:"-"`
 }
 
 type DiaryContent struct {
@@ -18,8 +18,16 @@ type DiaryContent struct {
 	Comment   string `json:"comment"`
 	CreatedAt int64  `json:"created_at"`
 
-	Title string `json:"-"`
+	TimeStr string `json:"-"`
 	HtmlContent template.HTML `json:"-"`
+	ContentLen int `json:"-"`
+}
+
+type DiaryView struct {
+	DateStr string `json:"-"`
+	NextLink string `json:"-"`
+	PreviousLink string `json:"-"`
+	Diaries []Diary
 }
 
 type DiaryNav struct {

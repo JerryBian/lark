@@ -134,8 +134,6 @@ func (s *Db) Dump() ([]Diary, error) {
 	}
 
 	for i := range diaries {
-		diaries[i].Title = time.UnixMicro(diaries[i].CreatedAt).Format("2006年01月02日 15时04分05秒")
-
 		rows, err := database.Query("SELECT id, diary_id, content, comment, created_at FROM diary_content WHERE diary_id = ? ORDER BY created_at DESC", diaries[i].Id)
 		if err != nil {
 			return nil, err
@@ -176,7 +174,6 @@ func (s *Db) GetDiaryById(id int) (Diary, error) {
 		}
 	}
 
-	d.Title = time.UnixMicro(d.CreatedAt).Format("2006年01月02日 15时04分05秒")
 	rows, err = database.Query("SELECT id, created_at, diary_id, content, comment FROM diary_content WHERE diary_id = ? ORDER BY created_at DESC", d.Id)
 	if err != nil {
 		return Diary{}, err
@@ -189,23 +186,28 @@ func (s *Db) GetDiaryById(id int) (Diary, error) {
 			return Diary{}, err
 		}
 
-		c.Title = time.UnixMicro(d.CreatedAt).Format("15时04分05秒")
+		c.ContentLen = len(c.Content)
+		c.TimeStr = time.UnixMicro(d.CreatedAt).Format("15时04分05秒")
 		cs = append(cs, c)
 	}
 
 	d.Contents = cs
+	d.Revisions = len(d.Contents)
+
 	return d, nil
 }
 
-func (s *Db) GetDiaries(year int, month int, day int) ([]Diary, error) {
+func (s *Db) GetDiaries(year int, month int, day int) (DiaryView, error) {
 	database, _ := sql.Open("sqlite3", s.Conf.Database.ConnStr)
 	defer database.Close()
+
+	def := DiaryView {}
 
 	start := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).UnixMicro()
 	end := time.Date(year, time.Month(month), day, 23, 59, 59, 999, time.UTC).UnixMicro()
 	rows, err := database.Query("SELECT id FROM diary WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC", start, end)
 	if err != nil {
-		return nil, err
+		return def, err
 	}
 
 	defer rows.Close()
@@ -213,18 +215,60 @@ func (s *Db) GetDiaries(year int, month int, day int) ([]Diary, error) {
 	for rows.Next() {
 		var diaryId int
 		if err := rows.Scan(&diaryId); err != nil {
-			return nil, err
+			return def, err
 		}
 
 		d, err := s.GetDiaryById(diaryId)
 		if err != nil {
-			return nil, err
+			return def, err
 		}
 
 		r = append(r, d)
 	}
 
-	return r, nil
+	v := DiaryView{
+		DateStr: time.UnixMicro(start).Format("2006年01月02日"),
+		Diaries: r,
+	}
+
+	var pd time.Time
+	rows, err = database.Query("SELECT created_at FROM diary WHERE created_at < ? ORDER BY created_at DESC LIMIT 1", start)
+	if err != nil {
+		return def, err
+	}
+
+	for rows.Next() {
+		var x int64
+		if err := rows.Scan(&x); err != nil {
+			return def, err
+		}
+
+		pd = time.UnixMicro(x)
+	}
+
+	if !pd.IsZero(){
+		v.PreviousLink = fmt.Sprintf("/diary/%s/%s/%s", pd.Format("2006"), pd.Format("01"), pd.Format("02"))
+	}
+
+	var nd time.Time
+	rows, err = database.Query("SELECT created_at FROM diary WHERE created_at > ? ORDER BY created_at ASC LIMIT 1", end)
+	if err != nil {
+		return def, err
+	}
+
+	for rows.Next() {
+		var x int64
+		if err := rows.Scan(&x); err != nil {
+			return def, err
+		}
+
+		nd = time.UnixMicro(x)
+	}
+
+	if !nd.IsZero(){
+		v.NextLink = fmt.Sprintf("/diary/%s/%s/%s", nd.Format("2006"), nd.Format("01"), nd.Format("02"))
+	}
+	return v, nil
 }
 
 func (s *Db) GetDiaryNavs() ([]DiaryNav, error) {

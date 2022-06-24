@@ -90,7 +90,7 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 
 	repo := Db{Conf: h.Conf}
 
-	d, err := repo.GetDiaries(year, month, day)
+	v, err := repo.GetDiaries(year, month, day)
 	if err != nil {
 		log.Println(err)
 		c.String(http.StatusBadRequest, "Something is wrong.")
@@ -99,10 +99,10 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
 	
-	for i := range d {
+	for i := range v.Diaries {
 		parser := parser.NewWithExtensions(extensions)
-		h := string(markdown.ToHTML([]byte(d[i].Contents[0].Content), parser, nil))
-		d[i].Contents[0].HtmlContent = template.HTML(h)
+		h := string(markdown.ToHTML([]byte(v.Diaries[i].Contents[0].Content), parser, nil))
+		v.Diaries[i].Contents[0].HtmlContent = template.HTML(h)
 	}
 
 	navs, err := getDiaryNavs(h.Conf)
@@ -113,7 +113,7 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "diary.html", gin.H{
-		"Diaries": d,
+		"V": v,
 		"Navs": navs,
 		"Title": fmt.Sprintf("查看日记：%v年%v月%v日", year, month, day),
 	})
