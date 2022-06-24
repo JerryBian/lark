@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +16,8 @@ import (
 
 	C "github.com/JerryBian/lark/internal/config"
 	I "github.com/JerryBian/lark/internal/core"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/parser"
 )
 
 func init() {
@@ -26,7 +30,7 @@ type Handler struct {
 
 func (h *Handler) Run() {
 	r := gin.Default()
-	sessionSecret := []byte(time.Now().Local().Format("2006-01-02 15:04:05"))
+	sessionSecret := []byte(h.Conf.Server.SessionSecret)
 	r.Use(sessions.Sessions("_lark_", sessions.NewCookieStore(sessionSecret)))
 
 	templ := template.Must(template.New("").ParseFS(h.Conf.Runtime.F, "internal/diary/html/*.html"))
@@ -45,22 +49,73 @@ func (h *Handler) Run() {
 	authRoute := r.Group("/")
 	authRoute.Use(AuthRequired)
 	authRoute.GET("/", h.indexHandler)
+	authRoute.GET("/diary/add", h.addDiaryGetHandler)
 	authRoute.POST("/api/word/add", h.addWordHandler)
+	authRoute.GET("/diary/:year/:month/:day", h.getDiariesHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
 func (h *Handler) indexHandler(c *gin.Context) {
-	repo := Db{Conf: h.Conf}
-
-	diaries, err := repo.Dump()
+	navs, err := getDiaryNavs(h.Conf)
 	if err != nil {
 		log.Println(err)
 		c.String(http.StatusBadRequest, "Something is wrong.")
 	}
 
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"Diaries": diaries,
+		"Navs": navs,
+		"Title": "Index",
+	})
+}
+
+func (h *Handler) getDiariesHandler(c *gin.Context) {
+	year, err := strconv.Atoi(c.Param("year")); if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	month, err := strconv.Atoi(c.Param("month")); if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	day, err := strconv.Atoi(c.Param("day")); if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	repo := Db{Conf: h.Conf}
+
+	d, err := repo.GetDiaries(year, month, day)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	
+	for i := range d {
+		parser := parser.NewWithExtensions(extensions)
+		h := string(markdown.ToHTML([]byte(d[i].Contents[0].Content), parser, nil))
+		d[i].Contents[0].HtmlContent = template.HTML(h)
+	}
+
+	navs, err := getDiaryNavs(h.Conf)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	c.HTML(http.StatusOK, "diary.html", gin.H{
+		"Diaries": d,
+		"Navs": navs,
+		"Title": fmt.Sprintf("查看日记：%v年%v月%v日", year, month, day),
 	})
 }
 
@@ -126,6 +181,20 @@ func (h *Handler) loginHander(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 
+func (h *Handler) addDiaryGetHandler(c *gin.Context) {
+	navs, err := getDiaryNavs(h.Conf)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	c.HTML(http.StatusOK, "addDiary.html", gin.H{
+		"Navs": navs,
+		"Title": fmt.Sprintf("添加日记"),
+	})
+}
+
 func (h *Handler) addWordHandler(c *gin.Context) {
 	var word Diary
 	var res I.JsonResponse[string]
@@ -158,4 +227,16 @@ func (h *Handler) addWordHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, res)
+}
+
+func getDiaryNavs(c *C.Config) ([]DiaryNav, error) {
+	repo := Db{Conf: c}
+
+	navs, err := repo.GetDiaryNavs()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return navs, nil
 }

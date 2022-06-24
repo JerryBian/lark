@@ -1,8 +1,20 @@
 Listed changes for every releases.
 
+## Version 2
+
+Breaking changes on the SQLite structure.
+
+### 2.1
+
+- Introduce Bootstrap Icons
+- Upgrade Bootstrap to 5.2 beta1
+- Redesign the look
+
 ### 2.0
 
-Init version for 2.0, this is a breaking version which not compatible with 1.x
+Init version.
+
+## Version 1
 
 ### 1.5
 

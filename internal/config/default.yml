@@ -5,6 +5,7 @@ server:
   port: 9898
   mode: diary
   ginMode: debug
+  sessionSecret: dev
 
 user:
   name: test

@@ -18,6 +18,7 @@ type Config struct {
 		Port int `yaml:"port" envconfig:"ENV_SERVER_PORT"`
 		Mode string `yaml:"mode" envconfig:"ENV_SERVER_MODE"`
 		GinMode string `yaml:"ginMode" envconfig:"ENV_SERVER_GIN_MODE"`
+		SessionSecret string `yaml:"sessionSecret" envconfig:"ENV_SERVER_SESSION_SECRET"`
 	} `yaml:"server"`
 
 	Database struct {
@@ -41,6 +42,7 @@ type Config struct {
 		LastBackupAt time.Time
 		LastModifiedAt time.Time
 		F *embed.FS
+		
 	}
 }
 
@@ -114,6 +116,10 @@ func verify(c *Config){
 
 	if c.Server.GinMode != "" {
 		os.Setenv("GIN_MODE", c.Server.GinMode)
+	}
+
+	if c.Server.SessionSecret == "" {
+		c.Server.SessionSecret = time.Now().Local().Format("2006-01-02 15:04:05")
 	}
 
 	c.Database.ConnStr = fmt.Sprintf("file:%s?cache=shared&mode=rwc&_foreign_keys=on&_journal_mode=WAL", dbFile)

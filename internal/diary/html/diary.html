@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+    {{ template "head" .}}
+    <body>
+        {{ template "header" .}}
+        <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
+            {{ template "sidebar" .}}
+    
+            <main class="bd-main order-1">
+                <div class="bd-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
+                    <button class="btn btn-link link-dark p-md-0 mb-2 mb-md-0 text-decoration-none bd-toc-toggle d-md-none"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#tocContents" aria-expanded="false"
+                        aria-controls="tocContents">
+                        索引
+                        <svg class="bi d-md-none ms-2" aria-hidden="true">
+                            <use xlink:href="#chevron-expand"></use>
+                        </svg>
+                    </button>
+                    <strong class="d-none d-md-block h6 my-2">索引</strong>
+                    <hr class="d-none d-md-block my-2">
+                    <div class="collapse bd-toc-collapse" id="tocContents">
+                        <nav id="TableOfContents">
+                            <ul>
+                                {{ range .Diaries }}
+                                {{ $c := index .Contents 0 }}
+                                <li><a href="#c{{ $c.Id }}">{{ $c.Title }}</a></li>
+                                {{end}}
+                
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                
+                
+                <div class="bd-content ps-lg-2">
+                
+                    {{ range .Diaries }}
+                    {{ $c := index .Contents 0 }}
+                    <div class="card mb-3" id="c{{ $c.Id }}">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">{{ $c.Title }}</h6>
+                            <div class="card-text">
+                                {{ $c.HtmlContent }}
+                            </div>
+                        </div>
+                    </div>
+                
+                    {{ end }}
+                
+                </div>
+            </main>
+        </div>
+        {{ template "footer" . }}
+    </body>
+</html>

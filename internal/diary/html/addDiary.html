@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+{{ template "head" .}}
+
+<body>
+    {{ template "header" .}}
+    <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
+        {{ template "sidebar" .}}
+
+        <main class="p-1">
+            <div class="text-end small text-muted mt-1 form-text" id="remainWords">Max words: </div>
+            <div class="mb-3">
+                <textarea rows="7" class="form-control " id="newWordsContent"></textarea>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn btn-primary btn-sm" id="saveNewWords" disabled>Save new
+                    words</button>
+            </div>
+        </main>
+    </div>
+    {{ template "footer" . }}
+    <script>
+        const maxWords = 320;
+        let newWordsContent = document.querySelector("#newWordsContent");
+        let remainWords = document.querySelector("#remainWords");
+        let saveNewWords = document.querySelector("#saveNewWords");
+
+        newWordsContent.addEventListener("input", function () {
+            let inputWords = newWordsContent.value.length;
+            remainWords.innerHTML = `${maxWords - inputWords} words remaining...`;
+
+            if (inputWords > maxWords || inputWords <= 0) {
+                saveNewWords.disabled = true;
+            } else {
+                saveNewWords.disabled = false;
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            remainWords.innerHTML = `Max words: ${maxWords}`;
+        });
+
+        saveNewWords.addEventListener("click", function () {
+            saveNewWords.disabled = true;
+            if (newWordsContent.value.length > maxWords || newWordsContent.value.length <= 0) {
+                return;
+            }
+
+            fetch("/api/word/add", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        content: newWordsContent.value
+                    }]
+                })
+            }).then(res => {
+                return res.json()
+            }).then(data => {
+                console.log("Add new words successfully.");
+                console.log(data)
+                if (data.Error) {
+                    alert(data.Error);
+                } else {
+                    window.location.href = "/";
+                }
+
+            });
+        });
+    </script>
+</body>
+
+</html>

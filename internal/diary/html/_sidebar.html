@@ -1,0 +1,59 @@
+{{ define "sidebar" }}
+<aside class="lark-sidebar">
+    <div class="offcanvas-lg offcanvas-start" id="larkSidebar" aria-labelledby="larkSidebarOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="larkSidebarOffcanvasLabel">Browse docs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"
+                data-bs-target="#larkSidebar"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            <nav class="bd-links w-100" id="bd-docs-nav" aria-label="Docs navigation">
+                <ul class="bd-links-nav list-unstyled mb-0 pb-3 pb-md-2 pe-lg-2">
+                    {{ range .Navs }}
+                    <li class="bd-links-group py-2">
+                        <strong class="bd-links-heading d-flex w-100 align-items-center fw-semibold">
+                            <a href="#{{ .Key }}" data-bs-toggle="collapse">
+                                <i class="bi bi-caret-right"></i>
+                                {{ .Title }}
+                            </a>
+                        </strong>
+
+                        <ul class="list-unstyled fw-normal pb-2 small collapse" id="{{ .Key }}">
+                            {{ range $index, $yc := .Children }}
+                            <li>
+                                <a href="#{{ $yc.Key }}" data-bs-toggle="collapse"
+                                    class="bd-links-link d-inline-block rounded active" aria-current="page">
+                                    <i class="bi bi-caret-right"></i>
+                                    {{ $yc.Title }}
+                                </a>
+
+                                <ul class="list-unstyled fw-normal pb-2 small collapse" id="{{ $yc.Key }}">
+                                    {{ range $index, $zc := $yc.Children }}
+                                    <li>
+                                        <a href="{{ $zc.Link }}" class="bd-links-link d-inline-block rounded active"
+                                            aria-current="page">
+                                            {{ $zc.Title }}
+                                        </a>
+                                    </li>
+                                    {{ end }}
+                                </ul>
+                            </li>
+                            {{ end }}
+                        </ul>
+                    </li>
+
+                    {{ end }}
+                    <li class="bd-links-span-all mt-1 mb-3 mx-4 border-top"></li>
+                    <li class="bd-links-span-all">
+                        <a href="/docs/5.2/migration/" class="bd-links-link d-inline-block rounded small ">
+                            Migration
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</aside>
+{{ end }}
