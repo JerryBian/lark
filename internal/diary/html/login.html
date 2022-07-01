@@ -1,45 +1,25 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
+{{ template "head" .}}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link href="/static/style/bootstrap.min.css" rel="stylesheet" />
-    <link href="/static/style/style.css" rel="stylesheet" />
-
-    <title>Login &middot; Lark</title>
-</head>
-
-<body class="p-1 d-flex flex-column w-100 min-vh-100">
-    <nav class="text-center my-3">
-        <div class="mb-3"><a href="/">
-                <img src="/static/img/lark.png" alt="" width="48" height="48">
-            </a></div>
-    </nav>
-
-    <main>
-        <h3 class="text-center">Login</h3>
+<body>
+    <main class="container p-4">
+        <h3 class="text-center"><i class="bi bi-check-all"></i> Login</h3>
         <form action="/login" method="post">
             <div class="mb-3">
                 <label for="userName" class="form-label">User Name</label>
-                <input type="text" class="form-control" id="userName" name="userName" placeholder="joe" autocomplete="off">
+                <input type="text" class="form-control" id="userName" name="userName" placeholder="joe"
+                    autocomplete="off">
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password">
             </div>
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-signpost-fill"></i> Go </button>
             </div>
         </form>
     </main>
-
-    <footer class="text-center my-2 mt-auto text-muted small">
-        <a href="https://github.com/JerryBian/lark" class="text-reset">GitHub</a> &middot;
-        <a href="https://www.flaticon.com/free-icons/bird" class="text-reset" title="bird icons">Icons</a>
-    </footer>
-    <script src="/static/script/bootstrap.min.js"></script>
 </body>
 
 </html>

@@ -4,6 +4,11 @@ Listed changes for every releases.
 
 Breaking changes on the SQLite structure.
 
+### 2.2
+
+- Support more user customized environment variables
+- Enhance sidebar
+
 ### 2.1
 
 - Introduce Bootstrap Icons

@@ -8,12 +8,12 @@
         </div>
 
         <div class="offcanvas-body">
-            <nav class="bd-links w-100" id="bd-docs-nav" aria-label="Docs navigation">
-                <ul class="bd-links-nav list-unstyled mb-0 pb-3 pb-md-2 pe-lg-2">
+            <nav class="lark-links w-100" id="bd-docs-nav" aria-label="Docs navigation">
+                <ul class="lark-links-nav list-unstyled mb-0 pb-3 pb-md-2 pe-lg-2">
                     {{ range .Navs }}
-                    <li class="bd-links-group py-2">
-                        <strong class="bd-links-heading d-flex w-100 align-items-center fw-semibold">
-                            <a href="#{{ .Key }}" data-bs-toggle="collapse">
+                    <li class="lark-links-group py-2 mb-1">
+                        <strong class="lark-links-heading d-flex w-100 align-items-center fw-semibold">
+                            <a href="#{{ .Key }}" data-bs-toggle="collapse" class="text-decoration-none text-reset sidebar-link">
                                 <i class="bi bi-caret-right"></i>
                                 {{ .Title }}
                             </a>
@@ -21,17 +21,18 @@
 
                         <ul class="list-unstyled fw-normal pb-2 small collapse" id="{{ .Key }}">
                             {{ range $index, $yc := .Children }}
-                            <li>
+                            <li class="mb-1">
                                 <a href="#{{ $yc.Key }}" data-bs-toggle="collapse"
-                                    class="bd-links-link d-inline-block rounded active" aria-current="page">
+                                    class="lark-links-link d-inline-block rounded sidebar-link" aria-current="page">
                                     <i class="bi bi-caret-right"></i>
                                     {{ $yc.Title }}
                                 </a>
 
                                 <ul class="list-unstyled fw-normal pb-2 small collapse" id="{{ $yc.Key }}">
                                     {{ range $index, $zc := $yc.Children }}
-                                    <li>
-                                        <a href="{{ $zc.Link }}" class="bd-links-link d-inline-block rounded active"
+                                    <li class="ps-3">
+                                        <a href="{{ $zc.Link }}" class="lark-links-link d-inline-block rounded"
+                                        data-diary-link="{{ $zc.Link }}"
                                             aria-current="page">
                                             {{ $zc.Title }}
                                         </a>
@@ -44,9 +45,9 @@
                     </li>
 
                     {{ end }}
-                    <li class="bd-links-span-all mt-1 mb-3 mx-4 border-top"></li>
-                    <li class="bd-links-span-all">
-                        <a href="/docs/5.2/migration/" class="bd-links-link d-inline-block rounded small ">
+                    <li class="lark-links-span-all mt-1 mb-3 mx-4 border-top"></li>
+                    <li class="lark-links-span-all">
+                        <a href="/docs/5.2/migration/" class="lark-links-link d-inline-block rounded small ">
                             Migration
                         </a>
                     </li>

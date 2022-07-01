@@ -569,7 +569,7 @@
 
 :root {
     --lark-purple: #4c0bce;
-    --lark-violet: #cdd1e4;
+    --lark-violet: #712cf9;
     --lark-accent: #ffe484;
     --lark-violet-rgb: 112.520718, 44.062154, 249.437846;
     --lark-accent-rgb: 255, 228, 132;
@@ -691,31 +691,31 @@
 }
 
 @media (max-width: 991.98px) {
-    .bd-links-nav {
+    .lark-links-nav {
         font-size: .875rem
     }
 }
 
 @media (max-width: 991.98px) {
-    .bd-links-nav {
+    .lark-links-nav {
         -moz-column-count: 2;
         column-count: 2;
         -moz-column-gap: 1.5rem;
         column-gap: 1.5rem
     }
 
-    .bd-links-nav .bd-links-group {
+    .lark-links-nav .lark-links-group {
         -moz-column-break-inside: avoid;
         break-inside: avoid
     }
 
-    .bd-links-nav .bd-links-span-all {
+    .lark-links-nav .lark-links-span-all {
         -moz-column-span: all;
         column-span: all
     }
 }
 
-.bd-links-link {
+.lark-links-link {
     padding: .1875rem .5rem;
     margin-top: .125rem;
     margin-left: 1rem;
@@ -723,14 +723,14 @@
     text-decoration: none
 }
 
-.bd-links-link:hover,
-.bd-links-link:focus,
-.bd-links-link.active {
+.lark-links-link:hover,
+.lark-links-link:focus,
+.lark-links-link.active {
     color: rgba(0, 0, 0, 0.85);
     background-color: rgba(var(--lark-violet-rgb), 0.1)
 }
 
-.bd-links-link.active {
+.lark-links-link.active {
     font-weight: 600
 }
 

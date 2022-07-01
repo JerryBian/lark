@@ -40,7 +40,10 @@ func (h *Handler) Run() {
 	r.StaticFS("/static", http.FS(staticFs))
 
 	r.GET("/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login.html", gin.H{})
+		c.HTML(http.StatusOK, "login.html", gin.H{
+			"Title": "Login",
+			"Config": h.Conf,
+		})
 	})
 
 	r.POST("/login", h.loginHander)
@@ -65,7 +68,8 @@ func (h *Handler) indexHandler(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"Navs": navs,
-		"Title": "Index",
+		"Title": "首页",
+		"Config": h.Conf,
 	})
 }
 
@@ -115,7 +119,9 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "diary.html", gin.H{
 		"V": v,
 		"Navs": navs,
-		"Title": fmt.Sprintf("查看日记：%v年%v月%v日", year, month, day),
+		"Title": fmt.Sprintf("%v年%v月%v日", year, month, day),
+		"Config": h.Conf,
+		"ActiveDiaryLink": fmt.Sprintf("/diary/%04d/%02d/%02d", year, month, day),
 	})
 }
 
@@ -191,7 +197,8 @@ func (h *Handler) addDiaryGetHandler(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "addDiary.html", gin.H{
 		"Navs": navs,
-		"Title": fmt.Sprintf("添加日记"),
+		"Title": "添加日记",
+		"Config": h.Conf,
 	})
 }
 

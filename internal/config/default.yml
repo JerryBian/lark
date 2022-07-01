@@ -6,6 +6,7 @@ server:
   mode: diary
   ginMode: debug
   sessionSecret: dev
+  title: lark
 
 user:
   name: test

@@ -19,6 +19,7 @@ type Config struct {
 		Mode string `yaml:"mode" envconfig:"ENV_SERVER_MODE"`
 		GinMode string `yaml:"ginMode" envconfig:"ENV_SERVER_GIN_MODE"`
 		SessionSecret string `yaml:"sessionSecret" envconfig:"ENV_SERVER_SESSION_SECRET"`
+		Title string `yaml:"title" envconfig:"ENV_SERVER_TITLE"`
 	} `yaml:"server"`
 
 	Database struct {
