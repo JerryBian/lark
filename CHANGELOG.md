@@ -4,6 +4,10 @@ Listed changes for every releases.
 
 Breaking changes on the SQLite structure.
 
+### 2.3
+
+Include version information in footer.
+
 ### 2.2
 
 - Support more user customized environment variables

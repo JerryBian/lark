@@ -12,6 +12,9 @@ import (
 
 //go:embed  internal/startup.sql internal/diary/html/* internal/config/default.yml static/*
 var f embed.FS
+var AppVer = "1.0"
+var GitHash = "1234567"
+var BuildTime = "2000-01-01"
 
 func main() {
 	log.SetOutput(os.Stdout)
@@ -19,6 +22,9 @@ func main() {
 	config := C.Config { }
 	config.Runtime.F = &f
 	config.Load()
+	config.Runtime.AppVer = AppVer
+	config.Runtime.GitHash = GitHash
+	config.Runtime.BuildTime = BuildTime
 
 	repo := I.Sqlite{Conf: &config}
 	repo.Startup()

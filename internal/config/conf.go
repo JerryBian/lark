@@ -1,13 +1,14 @@
 package internal
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
-	"embed"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
@@ -43,7 +44,10 @@ type Config struct {
 		LastBackupAt time.Time
 		LastModifiedAt time.Time
 		F *embed.FS
-		
+		AppVer string
+		GitHash string
+		BuildTime string
+		GoVer string
 	}
 }
 
@@ -124,4 +128,5 @@ func verify(c *Config){
 	}
 
 	c.Database.ConnStr = fmt.Sprintf("file:%s?cache=shared&mode=rwc&_foreign_keys=on&_journal_mode=WAL", dbFile)
+	c.Runtime.GoVer = runtime.Version()
 }
