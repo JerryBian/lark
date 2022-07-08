@@ -48,7 +48,7 @@ func (s *Db) CountDiaries() (int64, error) {
 func (s *Db) AddDiary(d Diary) (*Diary, error) {
 	log.Println("add new diary ...")
 	if len(d.Contents) == 0 {
-		return nil, errors.New("No content in diary.")
+		return nil, errors.New("no content in diary")
 	}
 
 	now := time.Now().UTC().UnixMicro()
@@ -94,6 +94,7 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 		if content.CreatedAt != 0 {
 			createdAt = content.CreatedAt
 		}
+		
 		res, err := database.Exec("INSERT INTO diary_content(diary_id, content, comment, created_at) VALUES(?,?,?,?)", d.Id, content.Content, content.Comment, createdAt)
 		if err != nil {
 			return nil, err
@@ -203,6 +204,7 @@ func (s *Db) GetLatestDiaries(d int) ([]Diary, error) {
 
 			content.ContentLen = utf8.RuneCountInString(content.Content)
 			content.TimeStr = time.UnixMicro(content.CreatedAt).Format("2006年01月02日 15时04分")
+			content.DayLink = time.UnixMicro(diaries[i].CreatedAt).Format("/diary/2006/01/02")
 			contents = append(contents, content)
 		}
 
@@ -244,6 +246,7 @@ func (s *Db) GetDiaryById(id int) (Diary, error) {
 
 		c.ContentLen = utf8.RuneCountInString(c.Content)
 		c.TimeStr = time.UnixMicro(d.CreatedAt).Format("15时04分05秒")
+		c.DayLink = time.UnixMicro(d.CreatedAt).Format("/diary/2006/01/02")
 		cs = append(cs, c)
 	}
 

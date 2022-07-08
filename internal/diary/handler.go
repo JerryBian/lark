@@ -55,6 +55,8 @@ func (h *Handler) Run() {
 	authRoute.GET("/diary/add", h.addDiaryGetHandler)
 	authRoute.POST("/api/word/add", h.addWordHandler)
 	authRoute.GET("/diary/:year/:month/:day", h.getDiariesHandler)
+	authRoute.GET("/diary/edit/:id", h.editDiaryGetHandler)
+	authRoute.GET("/diary/revision/:id", h.revisionHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
@@ -88,6 +90,84 @@ func (h *Handler) indexHandler(c *gin.Context) {
 		"Title": "首页",
 		"Config": h.Conf,
 		"D": d,
+	})
+}
+
+func (h *Handler) revisionHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id")); if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	repo := Db{Conf: h.Conf}
+	d, err := repo.GetDiaryById(id)
+	if err != nil{
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	if d.Id == 0 {
+		log.Printf("diary id %v not found for edit", id)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+	
+	navs, err := getDiaryNavs(h.Conf)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+	}
+
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+
+	for i := range d.Contents {
+		parser := parser.NewWithExtensions(extensions)
+		h := string(markdown.ToHTML([]byte(d.Contents[i].Content), parser, nil))
+		d.Contents[i].HtmlContent = template.HTML(h)
+	}
+
+	c.HTML(http.StatusOK, "diaryRevisions.html", gin.H{
+		"Navs": navs,
+		"Title": fmt.Sprintf("版本：%v", id),
+		"Config": h.Conf,
+		"D": d,
+	})
+}
+
+func (h *Handler) editDiaryGetHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id")); if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	repo := Db{Conf: h.Conf}
+	d, err := repo.GetDiaryById(id)
+	if err != nil{
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	if d.Id == 0 {
+		log.Printf("diary id %v not found for edit", id)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+	navs, err := getDiaryNavs(h.Conf)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	c.HTML(http.StatusOK, "editDiary.html", gin.H{
+		"D": d,
+		"Navs": navs,
+		"Title": fmt.Sprintf("编辑：%v", d.Id),
+		"Config": h.Conf,
 	})
 }
 

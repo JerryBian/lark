@@ -19,6 +19,7 @@ type DiaryContent struct {
 	CreatedAt int64  `json:"created_at"`
 
 	TimeStr string `json:"-"`
+	DayLink string `json:"-"`
 	HtmlContent template.HTML `json:"-"`
 	ContentLen int `json:"-"`
 }

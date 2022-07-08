@@ -21,8 +21,16 @@
                             <i class="bi bi-card-text"></i>
                             {{ $c.ContentLen }} 字
                             <div class="float-end">
-                                <a href="/diary/edit/{{ $c.Id }}">
-                                    <i class="bi bi-pen-fill" title="{{ .Revisions }} revisions"></i>
+                                <a href="{{ $c.DayLink }}" class="text-decoration-none text-reset">
+                                    <i class="bi bi-folder-symlink" title="Go to this day"></i>
+                                </a>
+                                &middot; 
+                                <a href="/diary/revision/{{ .Id }}" class="text-decoration-none text-reset">
+                                    <i class="bi bi-file-earmark-diff" title="{{ .Revisions }} revisions"></i>
+                                </a>
+                                &middot; 
+                                <a href="/diary/edit/{{ .Id }}" class="text-decoration-none text-reset">
+                                    <i class="bi bi-pen-fill" title="edit this version"></i>
                                 </a>
                             </div>
                         </div>

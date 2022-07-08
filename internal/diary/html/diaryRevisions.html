@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh">
+{{ template "head" .}}
+
+<body>
+    {{ template "header" .}}
+    <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
+        {{ template "sidebar" .}}
+
+        <main>
+
+            <h5 class="mb-3 mt-1">Revisions for diary {{ .D.Id }}</h5>
+            {{ range .D.Contents }}
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="card-subtitle mb-2 text-muted small">
+                        <i class="bi bi-clock"></i>
+                        {{ .TimeStr }}
+                        &middot; 
+                        <i class="bi bi-card-text"></i>
+                        {{ .ContentLen }} 字
+                        <div class="float-end">
+                            <a href="{{ .DayLink }}" class="text-decoration-none text-reset">
+                                <i class="bi bi-folder-symlink" title="Go to this day"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-text fs-5">
+                        {{ .HtmlContent }}
+                    </div>
+                </div>
+            </div>
+
+            {{ end }}
+        </main>
+    </div>
+    {{ template "footer" . }}
+</body>
+
+</html>

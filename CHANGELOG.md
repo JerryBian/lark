@@ -4,6 +4,11 @@ Listed changes for every releases.
 
 Breaking changes on the SQLite structure.
 
+### 2.5
+
+- Support Edit latest diary content
+- Support View all revisions for diary
+
 ### 2.4
 
 Add index page.
