@@ -6,8 +6,33 @@
         <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
             {{ template "sidebar" .}}
     
-            <main class="bd-main order-1">
-                Welcome!
+            <main>
+
+                <h5 class="mb-3 mt-1">Posts for latest 30 days</h5>
+                {{ range .D }}
+
+                {{ $c := index .Contents 0 }}
+                <div class="card mb-3" id="c{{ $c.Id }}">
+                    <div class="card-body">
+                        <div class="card-subtitle mb-2 text-muted small">
+                            <i class="bi bi-clock"></i>
+                            {{ $c.TimeStr }}
+                            &middot; 
+                            <i class="bi bi-card-text"></i>
+                            {{ $c.ContentLen }} 字
+                            <div class="float-end">
+                                <a href="/diary/edit/{{ $c.Id }}">
+                                    <i class="bi bi-pen-fill" title="{{ .Revisions }} revisions"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-text fs-5">
+                            {{ $c.HtmlContent }}
+                        </div>
+                    </div>
+                </div>
+
+                {{ end }}
             </main>
         </div>
         {{ template "footer" . }}

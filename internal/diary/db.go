@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"unicode/utf8"
 
 	C "github.com/JerryBian/lark/internal/config"
 	"golang.org/x/exp/slices"
@@ -157,6 +158,61 @@ func (s *Db) Dump() ([]Diary, error) {
 	return diaries, nil
 }
 
+func (s *Db) GetLatestDiaries(d int) ([]Diary, error) {
+	if d <= 0 {
+		return nil, errors.New("d must be greater than 0")
+	}
+
+	database, _ := sql.Open("sqlite3", s.Conf.Database.ConnStr)
+	defer database.Close()
+
+	now := time.Now()
+	start := now.AddDate(0, 0, -d).UnixMicro()
+	end := now.UnixMicro()
+	rows, err := database.Query("SELECT id, created_at, last_modified_at FROM diary WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC", start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var diaries []Diary
+	for rows.Next() {
+		var d Diary
+		if err := rows.Scan(&d.Id, &d.CreatedAt, &d.LastModifiedAt); err != nil {
+			return nil, err
+		}
+
+		diaries = append(diaries, d)
+	}
+
+	for i := range diaries {
+		rows, err := database.Query("SELECT id, diary_id, content, comment, created_at FROM diary_content WHERE diary_id = ? ORDER BY created_at DESC", diaries[i].Id)
+		if err != nil {
+			return nil, err
+		}
+
+		defer rows.Close()
+
+		var contents []DiaryContent
+		for rows.Next() {
+			var content DiaryContent
+			if err := rows.Scan(&content.Id, &content.DiaryId, &content.Content, &content.Comment, &content.CreatedAt); err != nil {
+				return nil, err
+			}
+
+			content.ContentLen = utf8.RuneCountInString(content.Content)
+			content.TimeStr = time.UnixMicro(content.CreatedAt).Format("2006年01月02日 15时04分")
+			contents = append(contents, content)
+		}
+
+		diaries[i].Contents = contents
+		diaries[i].Revisions = len(diaries[i].Contents)
+	}
+
+	return diaries, nil
+}
+
 func (s *Db) GetDiaryById(id int) (Diary, error) {
 	database, _ := sql.Open("sqlite3", s.Conf.Database.ConnStr)
 	defer database.Close()
@@ -186,7 +242,7 @@ func (s *Db) GetDiaryById(id int) (Diary, error) {
 			return Diary{}, err
 		}
 
-		c.ContentLen = len(c.Content)
+		c.ContentLen = utf8.RuneCountInString(c.Content)
 		c.TimeStr = time.UnixMicro(d.CreatedAt).Format("15时04分05秒")
 		cs = append(cs, c)
 	}

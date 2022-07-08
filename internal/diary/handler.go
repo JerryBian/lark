@@ -66,10 +66,28 @@ func (h *Handler) indexHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Something is wrong.")
 	}
 
+	repo := Db{Conf: h.Conf}
+
+	d, err := repo.GetLatestDiaries(30)
+	if err != nil {
+		log.Println(err)
+		c.String(http.StatusBadRequest, "Something is wrong.")
+		return
+	}
+
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+
+	for i := range d {
+		parser := parser.NewWithExtensions(extensions)
+		h := string(markdown.ToHTML([]byte(d[i].Contents[0].Content), parser, nil))
+		d[i].Contents[0].HtmlContent = template.HTML(h)
+	}
+
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"Navs": navs,
 		"Title": "首页",
 		"Config": h.Conf,
+		"D": d,
 	})
 }
 
