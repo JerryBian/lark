@@ -1,6 +1,8 @@
 package internal
 
-import "html/template"
+import (
+	"html/template"
+)
 
 type Diary struct {
 	Id             int64          `json:"id"`
@@ -9,6 +11,10 @@ type Diary struct {
 	LastModifiedAt int64          `json:"last_modified_at"`
 	
 	Revisions int `json:"-"`
+	DayLink string `json:"-"`
+	DayString string `json:"-"`
+	CreatedAtString string `json:"-"`
+	TimeOnlyStr string `json:"-"`
 }
 
 type DiaryContent struct {
@@ -18,14 +24,12 @@ type DiaryContent struct {
 	Comment   string `json:"comment"`
 	CreatedAt int64  `json:"created_at"`
 
-	TimeStr string `json:"-"`
-	DayLink string `json:"-"`
+	CreatedAtString string `json:"-"`
 	HtmlContent template.HTML `json:"-"`
 	ContentLen int `json:"-"`
 }
 
 type DiaryView struct {
-	DateStr string `json:"-"`
 	NextLink string `json:"-"`
 	PreviousLink string `json:"-"`
 	Diaries []Diary
@@ -36,5 +40,5 @@ type DiaryNav struct {
 	Link string  `json:"link"`
 	Tooltip string `json:"tooltip"`
 	Children []DiaryNav `json:"children"`
-	Key string `json:-`
+	Key string `json:"-"`
 }

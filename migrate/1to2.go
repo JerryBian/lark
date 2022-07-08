@@ -37,7 +37,7 @@ func main() {
 			fmt.Println(t.Add(time.Hour * time.Duration(-8)))
 			diary.CreatedAt = t.Add(time.Hour * time.Duration(-8)).UnixMicro()
 			fmt.Println(diary.CreatedAt)
-			diary.LastModifiedAt = time.Now().UTC().UnixMicro()
+			diary.LastModifiedAt = time.Now().UnixMicro()
 			fmt.Println(diary.LastModifiedAt)
 			diary.Contents = append(diary.Contents, R.DiaryContent{ Content: item.Content, Comment: "Init version", CreatedAt: diary.CreatedAt })
 			diaries = append(diaries, diary)

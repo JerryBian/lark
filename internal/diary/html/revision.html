@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh">
+{{ template "head" .}}
+
+<body>
+    {{ template "header" .}}
+    <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
+        {{ template "sidebar" .}}
+
+        <main class="bd-main order-1">
+
+            <div class="bd-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
+                <strong class="d-none d-md-block h6 my-2">索引</strong>
+                <hr class="d-none d-md-block my-2">
+                <div class="collapse bd-toc-collapse" id="tocContents">
+                    <nav id="TableOfContents">
+                        <ul>
+                            {{ range .D.Contents }}
+                            <li><a href="#c{{ .Id }}"><i class="bi bi-dash"></i> {{ .CreatedAtString }}</a></li>
+                            {{end}}
+
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="bd-content ps-lg-2">
+                <h5 class="mb-3 mt-1">Revisions for <a class="text-reset" href="{{ .D.DayLink }}">{{ .D.DayString }}</a>
+                </h5>
+                {{ range .D.Contents }}
+
+                <div class="text-success font-monospace small mb-1"><i class="bi bi-chat-dots"></i> {{ .Comment }}</div>
+                <div class="card mb-3">
+                    <div class="card-body" id="c{{ .Id }}">
+
+                        <div class="card-subtitle mb-2 text-muted small">
+                            <i class="bi bi-clock"></i>
+                            {{ .CreatedAtString }}
+                            &middot;
+                            <i class="bi bi-card-text"></i>
+                            {{ .ContentLen }} 字
+                        </div>
+
+                        <div class="card-text fs-5">
+
+                            {{ .HtmlContent }}
+                        </div>
+                    </div>
+                </div>
+
+                {{ end }}
+            </div>
+        </main>
+    </div>
+    {{ template "footer" . }}
+</body>
+
+</html>

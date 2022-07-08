@@ -6,30 +6,45 @@
         <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
             {{ template "sidebar" .}}
     
-            <main>
+            <main class="bd-main order-1">
 
-                <h5 class="mb-3 mt-1">Posts for latest 30 days</h5>
+                <div class="bd-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
+                    <strong class="d-none d-md-block h6 my-2">索引</strong>
+                    <hr class="d-none d-md-block my-2">
+                    <div class="collapse bd-toc-collapse" id="tocContents">
+                        <nav id="TableOfContents">
+                            <ul>
+                                {{ range .D }}
+                                <li><a href="#c{{ .Id }}"><i class="bi bi-dash"></i> {{ .CreatedAtString }}</a></li>
+                                {{end}}
+    
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="bd-content ps-lg-2">
+                    <h5 class="mb-3 mt-1">Posts for latest 30 days</h5>
                 {{ range .D }}
 
                 {{ $c := index .Contents 0 }}
-                <div class="card mb-3" id="c{{ $c.Id }}">
+                <div class="card mb-3" id="c{{ .Id }}">
                     <div class="card-body">
                         <div class="card-subtitle mb-2 text-muted small">
                             <i class="bi bi-clock"></i>
-                            {{ $c.TimeStr }}
+                            {{ .CreatedAtString }}
                             &middot; 
                             <i class="bi bi-card-text"></i>
                             {{ $c.ContentLen }} 字
                             <div class="float-end">
-                                <a href="{{ $c.DayLink }}" class="text-decoration-none text-reset">
+                                <a href="{{ .DayLink }}" class="text-decoration-none text-reset">
                                     <i class="bi bi-folder-symlink" title="Go to this day"></i>
                                 </a>
                                 &middot; 
-                                <a href="/diary/revision/{{ .Id }}" class="text-decoration-none text-reset">
+                                <a href="/revision/{{ .Id }}" class="text-decoration-none text-reset">
                                     <i class="bi bi-file-earmark-diff" title="{{ .Revisions }} revisions"></i>
                                 </a>
                                 &middot; 
-                                <a href="/diary/edit/{{ .Id }}" class="text-decoration-none text-reset">
+                                <a href="/edit/{{ .Id }}" class="text-decoration-none text-reset">
                                     <i class="bi bi-pen-fill" title="edit this version"></i>
                                 </a>
                             </div>
@@ -41,6 +56,7 @@
                 </div>
 
                 {{ end }}
+                </div>
             </main>
         </div>
         {{ template "footer" . }}

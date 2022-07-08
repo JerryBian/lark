@@ -17,10 +17,10 @@ import (
 type Config struct {
 	Server struct {
 		Port int `yaml:"port" envconfig:"ENV_SERVER_PORT"`
-		Mode string `yaml:"mode" envconfig:"ENV_SERVER_MODE"`
 		GinMode string `yaml:"ginMode" envconfig:"ENV_SERVER_GIN_MODE"`
 		SessionSecret string `yaml:"sessionSecret" envconfig:"ENV_SERVER_SESSION_SECRET"`
 		Title string `yaml:"title" envconfig:"ENV_SERVER_TITLE"`
+		MaxWordsAllowed int `yaml:"maxWordsAllowed" envconfig:"ENV_SERVER_MAX_WORDS_ALLOWED"`
 	} `yaml:"server"`
 
 	Database struct {
@@ -124,7 +124,11 @@ func verify(c *Config){
 	}
 
 	if c.Server.SessionSecret == "" {
-		c.Server.SessionSecret = time.Now().Local().Format("2006-01-02 15:04:05")
+		c.Server.SessionSecret = time.Now().Format("2006-01-02 15:04:05")
+	}
+
+	if c.Server.MaxWordsAllowed <= 0 {
+		c.Server.MaxWordsAllowed = 320
 	}
 
 	c.Database.ConnStr = fmt.Sprintf("file:%s?cache=shared&mode=rwc&_foreign_keys=on&_journal_mode=WAL", dbFile)

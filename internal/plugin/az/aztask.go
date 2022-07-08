@@ -59,15 +59,15 @@ func (at *AzTask) SpinWorker() {
 				if err != nil {
 					log.Println(err)
 				} else {
-					at.Config.Runtime.LastBackupAt = time.Now().Local()
+					at.Config.Runtime.LastBackupAt = time.Now()
 					log.Println("JSON saved successfully.")
 				}
 
-				err = Save("-"+time.Now().Local().Format("20060102150405"), b, at.Config)
+				err = Save("-"+time.Now().Format("20060102150405"), b, at.Config)
 				if err != nil {
 					log.Println(err)
 				} else {
-					at.Config.Runtime.LastBackupAt = time.Now().Local()
+					at.Config.Runtime.LastBackupAt = time.Now()
 					log.Println("JSON snapshot saved successfully.")
 				}
 			}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh">
+{{ template "head" .}}
+
+<body>
+    {{ template "header" .}}
+    <div class="container-xxl lark-gutter mt-3 my-md-4 lark-layout">
+        {{ template "sidebar" .}}
+
+        <main class="bd-main order-1">
+            <div class="bd-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
+                <strong class="d-none d-md-block h6 my-2">索引</strong>
+                <hr class="d-none d-md-block my-2">
+                <div class="collapse bd-toc-collapse" id="tocContents">
+                    <nav id="TableOfContents">
+                        <ul>
+                            {{ range .V.Diaries }}
+                            <li><a href="#c{{ .Id }}"><i class="bi bi-dash"></i> {{ .TimeOnlyStr }}</a></li>
+                            {{end}}
+
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+
+            <div class="bd-content ps-lg-2">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    {{ if ne .V.PreviousLink "" }}
+                    <a href="{{ .V.PreviousLink }}"><i class="bi bi-arrow-left"></i></a>
+                    {{ else }}
+                    <i class="bi bi-arrow-left"></i>
+                    {{ end }}
+                    
+                    {{ $x := index .V.Diaries 0 }}
+                    {{ $x.DayString }}
+                    {{ if ne .V.NextLink "" }}
+                    <a href="{{ .V.NextLink }}"><i class="bi bi-arrow-right"></i></a>
+                    {{ else }}
+                    <i class="bi bi-arrow-right"></i>
+                    {{ end }}
+                </div>
+                {{ range .V.Diaries }}
+
+                {{ $c := index .Contents 0 }}
+                <div class="card mb-3" id="c{{ .Id }}">
+                    <div class="card-body">
+                        <div class="card-subtitle mb-2 text-muted small">
+                            <i class="bi bi-clock"></i>
+                            {{ .TimeOnlyStr }}
+                            &middot; 
+                            <i class="bi bi-card-text"></i>
+                            {{ $c.ContentLen }} 字
+                            <div class="float-end">
+                                <a href="/revision/{{ .Id }}" class="text-decoration-none text-reset">
+                                    <i class="bi bi-file-earmark-diff" title="{{ .Revisions }} revisions"></i>
+                                </a>
+                                &middot; 
+                                <a href="/edit/{{ .Id }}" class="text-decoration-none text-reset">
+                                    <i class="bi bi-pen-fill" title="edit this version"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-text fs-5">
+                            {{ $c.HtmlContent }}
+                        </div>
+                    </div>
+                </div>
+
+                {{ end }}
+
+            </div>
+        </main>
+    </div>
+    {{ template "footer" . }}
+</body>
+
+</html>

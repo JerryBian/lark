@@ -3,7 +3,7 @@ database:
 
 server:
   port: 9898
-  mode: diary
+  maxWordsAllowed: 320
   ginMode: debug
   sessionSecret: dev
   title: lark

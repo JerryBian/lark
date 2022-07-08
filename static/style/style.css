@@ -1,7 +1,7 @@
 .grid {
     display: grid;
     grid-template-rows: repeat(var(--bs-rows, 1), 1fr);
-    grid-template-columns: repeat(var(--bs-columns, 12), 1fr);
+    grid-template-columns: repeat(var(--bs-columns, 12), 2fr);
     gap: var(--bs-gap, 1.5rem)
 }
 
@@ -751,7 +751,7 @@
     .bd-main {
         grid-template-areas: "intro   toc""content toc";
         grid-template-rows: auto 1fr;
-        grid-template-columns: 4fr 1fr
+        grid-template-columns: 7fr 2fr
     }
 }
 

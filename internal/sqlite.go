@@ -35,5 +35,6 @@ func (s *Sqlite) Startup() {
 	if err != nil {
 		panic(err)
 	}
+	
 	log.Println("Ran startup.sql completed.")
 }

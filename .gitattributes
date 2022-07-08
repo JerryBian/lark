@@ -1,2 +1,2 @@
-html/** -linguist-detectable
-style.css -linguist-detectable
+**/html/** -linguist-detectable
+**/*.css -linguist-detectable

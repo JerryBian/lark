@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -52,13 +53,13 @@ func (h *Handler) Run() {
 	authRoute := r.Group("/")
 	authRoute.Use(AuthRequired)
 	authRoute.GET("/", h.indexHandler)
-	authRoute.GET("/diary/add", h.addDiaryGetHandler)
-	authRoute.POST("/api/word/add", h.addWordHandler)
-	authRoute.GET("/diary/:year/:month/:day", h.getDiariesHandler)
-	authRoute.GET("/diary/edit/:id", h.editDiaryGetHandler)
-	authRoute.GET("/diary/revision/:id", h.revisionHandler)
+	authRoute.GET("/add", h.addDiaryGetHandler)
+	authRoute.POST("/api/add", h.addWordHandler)
+	authRoute.GET("/:year/:month/:day", h.getDiariesHandler)
+	authRoute.GET("/edit/:id", h.editDiaryGetHandler)
+	authRoute.GET("/revision/:id", h.revisionHandler)
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run()
 }
 
 func (h *Handler) indexHandler(c *gin.Context) {
@@ -77,14 +78,7 @@ func (h *Handler) indexHandler(c *gin.Context) {
 		return
 	}
 
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-
-	for i := range d {
-		parser := parser.NewWithExtensions(extensions)
-		h := string(markdown.ToHTML([]byte(d[i].Contents[0].Content), parser, nil))
-		d[i].Contents[0].HtmlContent = template.HTML(h)
-	}
-
+	NormalizeAll(d)
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"Navs": navs,
 		"Title": "首页",
@@ -120,15 +114,9 @@ func (h *Handler) revisionHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Something is wrong.")
 	}
 
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	Normalize(&d)
 
-	for i := range d.Contents {
-		parser := parser.NewWithExtensions(extensions)
-		h := string(markdown.ToHTML([]byte(d.Contents[i].Content), parser, nil))
-		d.Contents[i].HtmlContent = template.HTML(h)
-	}
-
-	c.HTML(http.StatusOK, "diaryRevisions.html", gin.H{
+	c.HTML(http.StatusOK, "revision.html", gin.H{
 		"Navs": navs,
 		"Title": fmt.Sprintf("版本：%v", id),
 		"Config": h.Conf,
@@ -156,6 +144,7 @@ func (h *Handler) editDiaryGetHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Something is wrong.")
 		return
 	}
+
 	navs, err := getDiaryNavs(h.Conf)
 	if err != nil {
 		log.Println(err)
@@ -163,7 +152,7 @@ func (h *Handler) editDiaryGetHandler(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "editDiary.html", gin.H{
+	c.HTML(http.StatusOK, "edit.html", gin.H{
 		"D": d,
 		"Navs": navs,
 		"Title": fmt.Sprintf("编辑：%v", d.Id),
@@ -199,13 +188,7 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 		return
 	}
 
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-	
-	for i := range v.Diaries {
-		parser := parser.NewWithExtensions(extensions)
-		h := string(markdown.ToHTML([]byte(v.Diaries[i].Contents[0].Content), parser, nil))
-		v.Diaries[i].Contents[0].HtmlContent = template.HTML(h)
-	}
+	NormalizeAll(v.Diaries)
 
 	navs, err := getDiaryNavs(h.Conf)
 	if err != nil {
@@ -214,7 +197,7 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "diary.html", gin.H{
+	c.HTML(http.StatusOK, "dayview.html", gin.H{
 		"V": v,
 		"Navs": navs,
 		"Title": fmt.Sprintf("%v年%v月%v日", year, month, day),
@@ -293,7 +276,7 @@ func (h *Handler) addDiaryGetHandler(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "addDiary.html", gin.H{
+	c.HTML(http.StatusOK, "add.html", gin.H{
 		"Navs": navs,
 		"Title": "添加日记",
 		"Config": h.Conf,
@@ -317,7 +300,7 @@ func (h *Handler) addWordHandler(c *gin.Context) {
 		return
 	}
 
-	now := time.Now().UTC().UnixMicro()
+	now := time.Now().UnixMicro()
 	word.CreatedAt = now
 	word.LastModifiedAt = now
 	word.Contents[0].CreatedAt = now
@@ -345,3 +328,46 @@ func getDiaryNavs(c *C.Config) ([]DiaryNav, error) {
 
 	return navs, nil
 }
+
+func NormalizeAll(ds []Diary) {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+
+	for i := range ds {
+		initCreatedTime := time.UnixMicro(ds[i].CreatedAt)
+		ds[i].DayString = initCreatedTime.Format("2006年01月02日")
+		ds[i].DayLink = initCreatedTime.Format("/2006/01/02")
+		ds[i].Revisions = len(ds[i].Contents)
+		ds[i].CreatedAtString = initCreatedTime.Format("2006年01月02日 15时04分")
+		ds[i].TimeOnlyStr = initCreatedTime.Format("15时04分05秒")
+
+		for j := range ds[i].Contents {
+			parser := parser.NewWithExtensions(extensions)
+			h := string(markdown.ToHTML([]byte(ds[i].Contents[j].Content), parser, nil))
+			ds[i].Contents[j].HtmlContent = template.HTML(h)
+
+			createdAt := time.UnixMicro(ds[i].Contents[j].CreatedAt)
+			ds[i].Contents[j].CreatedAtString = createdAt.Format("2006年01月02日 15时04分")
+			ds[i].Contents[j].ContentLen = utf8.RuneCountInString(ds[i].Contents[j].Content)
+		}
+	}
+} 
+
+func Normalize(d *Diary) {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	initCreatedTime := time.UnixMicro(d.CreatedAt)
+	d.DayString = initCreatedTime.Format("2006年01月02日")
+	d.DayLink = initCreatedTime.Format("/2006/01/02")
+	d.Revisions = len(d.Contents)
+	d.CreatedAtString = initCreatedTime.Format("2006年01月02日 15时04分")
+	d.TimeOnlyStr = initCreatedTime.Format("15时04分05秒")
+
+	for j := range d.Contents {
+		parser := parser.NewWithExtensions(extensions)
+		h := string(markdown.ToHTML([]byte(d.Contents[j].Content), parser, nil))
+		d.Contents[j].HtmlContent = template.HTML(h)
+
+		createdAt := time.UnixMicro(d.Contents[j].CreatedAt)
+		d.Contents[j].CreatedAtString = createdAt.Format("2006年01月02日 15时04分")
+		d.Contents[j].ContentLen = utf8.RuneCountInString(d.Contents[j].Content)
+	}
+} 

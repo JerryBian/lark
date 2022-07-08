@@ -4,6 +4,10 @@ Listed changes for every releases.
 
 Breaking changes on the SQLite structure.
 
+### 2.6
+
+Enhance some UI parts
+
 ### 2.5
 
 - Support Edit latest diary content

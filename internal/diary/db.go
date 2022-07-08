@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"unicode/utf8"
 
 	C "github.com/JerryBian/lark/internal/config"
 	"golang.org/x/exp/slices"
@@ -51,7 +50,7 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 		return nil, errors.New("no content in diary")
 	}
 
-	now := time.Now().UTC().UnixMicro()
+	now := time.Now().UnixMicro()
 	createdAt := now
 	lastModifedAt := now
 	if d.CreatedAt != 0 {
@@ -64,6 +63,7 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 	database, _ := sql.Open("sqlite3", s.Conf.Database.ConnStr)
 	defer database.Close()
 
+	defaultComment := "init version"
 	if d.Id > 0 {
 		var exist bool
 		row := database.QueryRow("SELECT EXISTS(SELECT id FROM diary WHERE id=? LIMIT 1)", d.Id)
@@ -75,6 +75,8 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		defaultComment = fmt.Sprintf("auto-generated: updated at %v", time.Now().Format("2006年01月02日 15时04分05秒"))
 	} else {
 		res, err := database.Exec("INSERT INTO diary(created_at, last_modified_at) VALUES(?,?)", createdAt, lastModifedAt)
 		if err != nil {
@@ -95,6 +97,10 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 			createdAt = content.CreatedAt
 		}
 		
+		if len(content.Comment) <= 0 {
+			content.Comment = defaultComment
+		}
+
 		res, err := database.Exec("INSERT INTO diary_content(diary_id, content, comment, created_at) VALUES(?,?,?,?)", d.Id, content.Content, content.Comment, createdAt)
 		if err != nil {
 			return nil, err
@@ -108,7 +114,7 @@ func (s *Db) AddDiary(d Diary) (*Diary, error) {
 		content.Id = id
 	}
 
-	s.Conf.Runtime.LastModifiedAt = time.Now().Local()
+	s.Conf.Runtime.LastModifiedAt = time.Now()
 	log.Println("finished add new diary")
 	return &d, nil
 }
@@ -202,14 +208,10 @@ func (s *Db) GetLatestDiaries(d int) ([]Diary, error) {
 				return nil, err
 			}
 
-			content.ContentLen = utf8.RuneCountInString(content.Content)
-			content.TimeStr = time.UnixMicro(content.CreatedAt).Format("2006年01月02日 15时04分")
-			content.DayLink = time.UnixMicro(diaries[i].CreatedAt).Format("/diary/2006/01/02")
 			contents = append(contents, content)
 		}
 
 		diaries[i].Contents = contents
-		diaries[i].Revisions = len(diaries[i].Contents)
 	}
 
 	return diaries, nil
@@ -244,9 +246,6 @@ func (s *Db) GetDiaryById(id int) (Diary, error) {
 			return Diary{}, err
 		}
 
-		c.ContentLen = utf8.RuneCountInString(c.Content)
-		c.TimeStr = time.UnixMicro(d.CreatedAt).Format("15时04分05秒")
-		c.DayLink = time.UnixMicro(d.CreatedAt).Format("/diary/2006/01/02")
 		cs = append(cs, c)
 	}
 
@@ -262,8 +261,8 @@ func (s *Db) GetDiaries(year int, month int, day int) (DiaryView, error) {
 
 	def := DiaryView {}
 
-	start := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).UnixMicro()
-	end := time.Date(year, time.Month(month), day, 23, 59, 59, 999, time.UTC).UnixMicro()
+	start := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local).UnixMicro()
+	end := time.Date(year, time.Month(month), day, 23, 59, 59, 999, time.Local).UnixMicro()
 	rows, err := database.Query("SELECT id FROM diary WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC", start, end)
 	if err != nil {
 		return def, err
@@ -286,7 +285,6 @@ func (s *Db) GetDiaries(year int, month int, day int) (DiaryView, error) {
 	}
 
 	v := DiaryView{
-		DateStr: time.UnixMicro(start).Format("2006年01月02日"),
 		Diaries: r,
 	}
 
@@ -306,7 +304,7 @@ func (s *Db) GetDiaries(year int, month int, day int) (DiaryView, error) {
 	}
 
 	if !pd.IsZero(){
-		v.PreviousLink = fmt.Sprintf("/diary/%s/%s/%s", pd.Format("2006"), pd.Format("01"), pd.Format("02"))
+		v.PreviousLink = fmt.Sprintf("/%s/%s/%s", pd.Format("2006"), pd.Format("01"), pd.Format("02"))
 	}
 
 	var nd time.Time
@@ -325,7 +323,7 @@ func (s *Db) GetDiaries(year int, month int, day int) (DiaryView, error) {
 	}
 
 	if !nd.IsZero(){
-		v.NextLink = fmt.Sprintf("/diary/%s/%s/%s", nd.Format("2006"), nd.Format("01"), nd.Format("02"))
+		v.NextLink = fmt.Sprintf("/%s/%s/%s", nd.Format("2006"), nd.Format("01"), nd.Format("02"))
 	}
 	return v, nil
 }
@@ -392,7 +390,7 @@ func (s *Db) GetDiaryNavs() ([]DiaryNav, error) {
 		if idz == -1 {
 			r[idx].Children[idy].Children = append(r[idx].Children[idy].Children, DiaryNav{
 				Title: fmt.Sprintf("%s日", day),
-				Link:  fmt.Sprintf("/diary/%s/%s/%s", year, month, day),
+				Link:  fmt.Sprintf("/%s/%s/%s", year, month, day),
 				Key:   dKey,
 			})
 		}
