@@ -11,6 +11,6 @@ npx uglifycss --ugly-comments --output $SCRIPT_DIR/../static/style/style.min.css
 echo "css completed."
 
 npx uglifyjs --compress -o $SCRIPT_DIR/../static/script/script.min.js \
-    $SCRIPT_DIR/../node_modules/bootstrap/dist/js/bootstrap.js \
+    $SCRIPT_DIR/../node_modules/bootstrap/dist/js/bootstrap.bundle.js \
     $SCRIPT_DIR/../static/script/script.js
 echo "js completed."
