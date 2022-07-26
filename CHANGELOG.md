@@ -4,6 +4,10 @@ Listed changes for every releases.
 
 Breaking changes on the SQLite structure.
 
+### 2.7
+
+Upgrade to Bootstrap 5.2 release.
+
 ### 2.6
 
 Enhance some UI parts

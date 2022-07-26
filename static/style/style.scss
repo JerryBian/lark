@@ -1,0 +1,314 @@
+
+$enable-cssgrid: true;
+$body-bg: rgb(255, 255, 255);
+
+@import "../../node_modules/bootstrap-icons/font/bootstrap-icons";
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+.lark-content {
+    background-color: #fff;
+}
+
+:root {
+    --lark-purple: #4c0bce;
+    --lark-violet: #712cf9;
+    --lark-accent: #ffe484;
+    --lark-violet-rgb: 60, 99, 130;
+    --lark-accent-rgb: 255, 228, 132;
+    --lark-pink-rgb: 214, 51, 132;
+    --lark-teal-rgb: 32, 201, 151;
+}
+
+.ff-1{
+    font-family: Georgia,serif;
+    font-size: 1.1rem;
+}
+
+.lark-navbar {
+    padding: .75rem 0;
+    background-color: transparent;
+    background-image: linear-gradient(to bottom, rgba(var(--lark-violet-rgb), 1), rgba(var(--lark-violet-rgb), 0.95));
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.15)
+}
+
+.lark-navbar .navbar-toggler {
+    padding: 0;
+    margin-right: -.5rem;
+    border: 0
+}
+
+.lark-navbar .navbar-toggler:first-child {
+    margin-left: -.5rem
+}
+
+.lark-navbar .navbar-toggler .bi {
+    width: 1.5rem;
+    height: 1.5rem
+}
+
+.lark-navbar .navbar-toggler:focus {
+    box-shadow: none
+}
+
+.lark-navbar .navbar-brand {
+    transition: .2s ease-in-out transform
+}
+
+.lark-navbar .navbar-brand:hover {
+    transform: rotate(-5deg) scale(1.1)
+}
+
+.lark-navbar .navbar-toggler,
+.lark-navbar .nav-link {
+    padding-right: .25rem;
+    padding-left: .25rem;
+    color: rgba(255, 255, 255, 0.85)
+}
+
+.lark-navbar .navbar-toggler:hover,
+.lark-navbar .navbar-toggler:focus,
+.lark-navbar .nav-link:hover,
+.lark-navbar .nav-link:focus {
+    color: #fff
+}
+
+.lark-navbar .navbar-toggler.active,
+.lark-navbar .nav-link.active {
+    font-weight: 600;
+    color: #fff
+}
+
+.lark-navbar .navbar-nav-svg {
+    display: inline-block;
+    vertical-align: -.125rem
+}
+
+.lark-navbar .offcanvas-lg {
+    background-color: var(--lark-violet);
+    border-left: 0
+}
+
+@media (max-width: 991.98px) {
+    .lark-navbar .offcanvas-lg {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175)
+    }
+}
+
+.lark-navbar .dropdown-toggle:focus:not(:focus-visible) {
+    outline: 0
+}
+
+.lark-navbar .dropdown-menu {
+    --bs-dropdown-min-width: 12rem;
+    --bs-dropdown-link-hover-bg: rgba(var(--lark-violet-rgb), .1);
+    --bs-dropdown-font-size: .875rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15)
+}
+
+.lark-navbar .dropdown-item.current {
+    font-weight: 600;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23292b2c' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem top 0.6rem;
+    background-size: .75rem .75rem
+}
+
+@media (min-width: 992px) {
+    .lark-layout {
+        display: grid;
+        grid-template-areas: "sidebar main";
+        grid-template-columns: 1fr 5fr;
+        gap: 1.5rem;
+    }
+
+    .lark-sidebar {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 5rem;
+        display: block !important;
+        height: calc(100vh - 6rem);
+        padding-left: .25rem;
+        margin-left: -.25rem;
+        overflow-y: auto;
+    }
+}
+
+.lark-sidebar {
+    grid-area: sidebar;
+}
+
+@media (max-width: 991.98px) {
+    .lark-links-nav {
+        font-size: .875rem
+    }
+}
+
+@media (max-width: 991.98px) {
+    .lark-links-nav {
+        -moz-column-count: 2;
+        column-count: 2;
+        -moz-column-gap: 1.5rem;
+        column-gap: 1.5rem
+    }
+
+    .lark-links-nav .lark-links-group {
+        -moz-column-break-inside: avoid;
+        break-inside: avoid
+    }
+
+    .lark-links-nav .lark-links-span-all {
+        -moz-column-span: all;
+        column-span: all
+    }
+}
+
+.lark-links-link {
+    padding: .1875rem .5rem;
+    margin-top: .125rem;
+    margin-left: 1rem;
+    color: rgba(0, 0, 0, 0.65);
+    text-decoration: none
+}
+
+.lark-links-link:hover,
+.lark-links-link:focus,
+.lark-links-link.active {
+    color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(var(--lark-violet-rgb), 0.1)
+}
+
+.lark-links-link.active {
+    font-weight: 600
+}
+
+.lark-gutter {
+    --bs-gutter-x: 3rem
+}
+
+@media (min-width: 768px) {
+    .bd-main {
+        display: grid;
+        grid-template-areas: "intro""toc""content";
+        grid-template-rows: auto auto 1fr;
+        gap: inherit
+    }
+}
+
+@media (min-width: 992px) {
+    .bd-main {
+        grid-template-areas: "intro   toc""content toc";
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 7fr 2fr
+    }
+}
+
+.lark-toc {
+    grid-area: toc
+}
+
+.lark-content {
+    grid-area: content;
+    min-width: 1px
+}
+
+@media (min-width: 992px) {
+    .lark-toc {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 5rem;
+        right: 0;
+        z-index: 2;
+        height: calc(100vh - 7rem);
+        overflow-y: auto
+    }
+}
+
+.lark-toc nav {
+    font-size: .875rem
+}
+
+.lark-toc nav ul {
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none
+}
+
+.lark-toc nav ul ul {
+    padding-left: 1rem;
+    margin-top: .25rem
+}
+
+.lark-toc nav li {
+    margin-bottom: .25rem
+}
+
+.lark-toc nav a {
+    color: inherit
+}
+
+.lark-toc nav a:not(:hover) {
+    text-decoration: none
+}
+
+.lark-toc nav a code {
+    font: inherit
+}
+
+.lark-toc-toggle {
+    display: flex;
+    align-items: center
+}
+
+@media (max-width: 575.98px) {
+    .lark-toc-toggle {
+        justify-content: space-between;
+        width: 100%
+    }
+}
+
+@media (max-width: 767.98px) {
+    .lark-toc-toggle {
+        border: 1px solid #dee2e6;
+        border-radius: .4rem
+    }
+
+    .lark-toc-toggle:hover,
+    .lark-toc-toggle:focus,
+    .lark-toc-toggle:active,
+    .lark-toc-toggle[aria-expanded="true"] {
+        color: var(--lark-violet);
+        background-color: #fff;
+        border-color: var(--lark-violet)
+    }
+
+    .lark-toc-toggle:focus,
+    .lark-toc-toggle[aria-expanded="true"] {
+        box-shadow: 0 0 0 3px rgba(var(--lark-violet-rgb), 0.25)
+    }
+}
+
+@media (max-width: 767.98px) {
+    .lark-toc-collapse nav {
+        padding: 1.25rem;
+        background-color: var(--bs-gray-100);
+        border: 1px solid #dee2e6;
+        border-radius: .25rem
+    }
+}
+
+@media (min-width: 768px) {
+    .lark-toc-collapse {
+        display: block !important
+    }
+}
+
+.lark-content a {
+    color: #495057;
+    text-decoration: none
+}
+
+.lark-content a:hover,
+.lark-content a:focus {
+    color: #0d6efd;
+    text-decoration: underline
+}

@@ -202,7 +202,7 @@ func (h *Handler) getDiariesHandler(c *gin.Context) {
 		"Navs": navs,
 		"Title": fmt.Sprintf("%v年%v月%v日", year, month, day),
 		"Config": h.Conf,
-		"ActiveDiaryLink": fmt.Sprintf("/diary/%04d/%02d/%02d", year, month, day),
+		"ActiveDiaryLink": fmt.Sprintf("/%04d/%02d/%02d", year, month, day),
 	})
 }
 

@@ -1,0 +1,27 @@
+{
+  "name": "lark",
+  "version": "1.0.0",
+  "description": "Your private self-hosted words platform, slimmest twitter alike!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "sh ./script/build-js-css.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JerryBian/lark.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/JerryBian/lark/issues"
+  },
+  "homepage": "https://github.com/JerryBian/lark#readme",
+  "devDependencies": {
+    "bootstrap": "^5.2.0",
+    "bootstrap-icons": "^1.9.1",
+    "sass": "^1.54.0",
+    "uglify-js": "^3.16.3",
+    "uglifycss": "^0.0.29"
+  }
+}

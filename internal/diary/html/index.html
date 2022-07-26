@@ -8,10 +8,10 @@
     
             <main class="bd-main order-1">
 
-                <div class="bd-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
+                <div class="lark-toc mt-3 mb-5 my-lg-0 ps-xl-3 mb-lg-5 text-muted">
                     <strong class="d-none d-md-block h6 my-2">索引</strong>
                     <hr class="d-none d-md-block my-2">
-                    <div class="collapse bd-toc-collapse" id="tocContents">
+                    <div class="collapse lark-toc-collapse" id="tocContents">
                         <nav id="TableOfContents">
                             <ul>
                                 {{ range .D }}
@@ -22,7 +22,7 @@
                         </nav>
                     </div>
                 </div>
-                <div class="bd-content ps-lg-2">
+                <div class="lark-content ps-lg-2">
                     <h5 class="mb-3 mt-1">Posts for latest 30 days</h5>
                 {{ range .D }}
 
@@ -49,7 +49,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="card-text fs-5">
+                        <div class="card-text fs-5 ff-1">
                             {{ $c.HtmlContent }}
                         </div>
                     </div>
